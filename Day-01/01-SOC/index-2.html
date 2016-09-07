@@ -40,21 +40,23 @@
 				if (_data[attrName] === value) return;
 				_data[attrName] = value;
 				//trigger change notification for 'attrName'
-				var changeHandler = _changeHandlers[attrName];
-				if (typeof changeHandler === 'function')
-					changeHandler();
+				var changeHandlers = _changeHandlers[attrName];
+				changeHandlers.forEach(function(changeHandler){
+					if (typeof changeHandler === 'function')
+						changeHandler();
+				});
 			};
 
 			var _changeHandlers = {
-				basic : null,
-				hra : null,
-				da : null,
-				tax : null,
-				salary : null
+				basic : [],
+				hra : [],
+				da : [],
+				tax : [],
+				salary : []
 			};
 
 			this.watch = function(attrName, changeHandler){
-				_changeHandlers[attrName] = changeHandler;
+				_changeHandlers[attrName].push(changeHandler);
 			};
 		}
 		SalaryCalculator.prototype.calculate = function(){
