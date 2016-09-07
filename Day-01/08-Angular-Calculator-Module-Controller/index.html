@@ -17,7 +17,7 @@
 		}
 	</style>
 	<!-- Basic, Hra, Da, Tax -->
-	<script src="jquery-3.1.0.js"></script>
+	
 	<script src="angular.js"></script>
 	<script>
 		String.prototype.toInt = function(){
@@ -39,19 +39,21 @@
 		}
 
 		//View
-		angular
-			.module("ng")
-			.run(function($rootScope){
-				//$rootScope.calculator = new SalaryCalculator();
-			});
+		var myApp = angular.module("myApp", []);
+		myApp.run(function($rootScope){
+			$rootScope.appName = "Salary Calculator - V1.0";
+		});
+		myApp.controller("calculatorController", function($scope){
+			$scope.calculator = new SalaryCalculator();
+		});
 		
 
 	</script>
 </head>
-<body ng-app>
-	<h1>Salary Calculator</h1>
+<body ng-app="myApp">
+	<h1 ng-bind="appName"></h1>
 	<hr>
-	<div class="content">
+	<div class="content" ng-controller="calculatorController">
 		<div class="field">
 			<label for="">Basic :</label>
 			<input type="number" id="txtBasic" ng-model="calculator.basic">
