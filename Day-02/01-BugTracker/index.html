@@ -52,15 +52,21 @@
 	<script>
 		var bugTrackerApp = angular.module("bugTrackerApp", []);
 
-		bugTrackerApp.value("bugOperations" , {
-			createNew : function(bugName){
-				return {
-					name : bugName,
-					isClosed : false
+		bugTrackerApp.factory("bugOperations" , function(defaultBugName){
+			var currentBugId = 0;
+			return {
+				createNew : function(bugName){
+					if (!bugName)
+						bugName = defaultBugName;
+					return {
+						id : ++currentBugId,
+						name : bugName,
+						isClosed : false
+					}
+				},
+				toggle : function(bug){
+					bug.isClosed = !bug.isClosed;
 				}
-			},
-			toggle : function(bug){
-				bug.isClosed = !bug.isClosed;
 			}
 		});
 
@@ -72,8 +78,7 @@
 				
 			];
 			$scope.addNew = function(bugName){
-				if (!bugName)
-					bugName = defaultBugName;
+				
 				var newBug = bugOperations.createNew(bugName);
 				$scope.bugs.push(newBug);
 			};
@@ -94,6 +99,15 @@
 			};
 		});
 
+		bugTrackerApp.value("defaultTrimLength", 30);
+
+		bugTrackerApp.filter("trimText", function(defaultTrimLength){
+
+			return function(data, trimLength){
+				trimLength = trimLength || defaultTrimLength;
+				return data.length > trimLength ? data.substr(0,trimLength) + '...' : data;
+			}
+		});
 	</script>
 </head>
 <body ng-app="bugTrackerApp" ng-controller="bugsController">
@@ -129,7 +143,7 @@
 	<section class="list">
 		<ol>
 			<li ng-repeat="bug in (bugs | filter:searchBug | orderBy:sortBugBy:sortBugDescending)">
-				<span class="bugname" ng-click="toggle(bug)" ng-class="{closed : bug.isClosed}">	{{bug.name}} <i><sup>[{{bug.id}}]<sup></i>
+				<span class="bugname" ng-click="toggle(bug)" ng-class="{closed : bug.isClosed}">	{{bug.name | trimText:20}} <i><sup>[{{bug.id}}]<sup></i>
 				</span>
 			</li>
 		</ol>
