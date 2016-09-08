@@ -51,22 +51,36 @@
 	<script src="angular.js"></script>
 	<script>
 		var bugTrackerApp = angular.module("bugTrackerApp", []);
-		bugTrackerApp.controller("bugsController", function($scope){
-			$scope.bugs = [
-				{name : 'Server communication failure', isClosed : false},
-				{name : 'Data validation failure', isClosed : false},
-				{name : 'User actions not recognized', isClosed : true},
-				
-			];
-			$scope.addNew = function(bugName){
-				var newBug = {
+
+		bugTrackerApp.value("bugOperations" , {
+			createNew : function(bugName){
+				return {
 					name : bugName,
 					isClosed : false
 				}
+			},
+			toggle : function(bug){
+				bug.isClosed = !bug.isClosed;
+			}
+		});
+
+		bugTrackerApp.value("defaultBugName", '[Default New Bug]')
+
+		bugTrackerApp.controller("bugsController", function($scope, bugOperations, defaultBugName){
+			$scope.bugs = [
+				{id : 1, name : 'Server communication failure', isClosed : false},
+				{id : 2, name : 'Data validation failure', isClosed : false},
+				{id : 3, name : 'User actions not recognized', isClosed : true},
+				
+			];
+			$scope.addNew = function(bugName){
+				if (!bugName)
+					bugName = defaultBugName;
+				var newBug = bugOperations.createNew(bugName);
 				$scope.bugs.push(newBug);
 			};
 			$scope.toggle = function(bug){
-				bug.isClosed = !bug.isClosed;
+				bugOperations.toggle(bug);
 			};
 			$scope.getClosedCount = function(){
 				var closedCount = 0;
@@ -85,7 +99,6 @@
 	</script>
 </head>
 <body ng-app="bugTrackerApp" ng-controller="bugsController">
-	<input type="text" ng-model="emp.name">
 	<h1>Bug Tracker</h1>
 	<hr>
 	<section class="stats">
@@ -118,7 +131,7 @@
 	<section class="list">
 		<ol>
 			<li ng-repeat="bug in (bugs | filter:searchBug | orderBy:sortBugBy:sortBugDescending)">
-				<span class="bugname" ng-click="toggle(bug)" ng-class="{closed : bug.isClosed}">	{{bug.name}}
+				<span class="bugname" ng-click="toggle(bug)" ng-class="{closed : bug.isClosed}">	{{bug.name}} <i><sup>[{{bug.id}}]<sup></i>
 				</span>
 			</li>
 		</ol>
