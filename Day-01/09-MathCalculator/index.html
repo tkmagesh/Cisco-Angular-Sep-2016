@@ -29,7 +29,7 @@
 
 		myApp.controller("calculatorController2", function($scope){
 			$scope.calculator = new MathCalculator();
-			$scope.operation = '';
+			//$scope.operation = '';
 			$scope.calculate = function(){
 				/*switch($scope.operation){
 					case 'add':
@@ -60,7 +60,7 @@
 		<input type="button" value="Subtract" ng-click="calculator.subtract()">
 		<input type="button" value="Multiply" ng-click="calculator.multiply()">
 		<input type="button" value="Divide" ng-click="calculator.divide()">
-		<div id="divResult" ng-bind="calculator.result"></div>
+		<div id="divResult" >{{calculator.result}}</div>
 	</div>
 	<hr>
 	<div id="calculator2" ng-controller="calculatorController2">
