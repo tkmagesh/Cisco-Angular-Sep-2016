@@ -6,8 +6,8 @@
 	<!-- 
 		Use Cases 
 		=========
-		1. Add a new bug
-		2. List the bugs
+		1. Add a new bug - done
+		2. List the bugs - done
 		3. Toggle the 'closed' status of a bug
 		4. Remove closed bugs
 		5. Display statistics
@@ -48,14 +48,29 @@
 			border-radius: 5px;
 		}
 	</style>
+	<script src="angular.js"></script>
+	<script>
+		var bugTrackerApp = angular.module("bugTrackerApp", []);
+		bugTrackerApp.controller("bugsController", function($scope){
+			$scope.bugs = [];
+			$scope.addNew = function(bugName){
+				var newBug = {
+					name : bugName,
+					isClosed : false
+				}
+				$scope.bugs.push(newBug);
+			};
+		});
+
+	</script>
 </head>
-<body>
+<body ng-app="bugTrackerApp" ng-controller="bugsController">
 	<h1>Bug Tracker</h1>
 	<hr>
 	<section class="stats">
 		<span class="closed">2</span>
 		<span> / </span>
-		<span class="total">5</span>
+		<span class="total">{{bugs.length}}</span>
 	</section>
 	<section class="search">
 		<label for="">Search :</label>
@@ -71,13 +86,14 @@
 	</section>
 	<section class="edit">
 		<label for="">Bug :</label>
-		<input type="text" name="" id="">
-		<input type="button" value="Add New">
+		<input type="text" ng-model="newBugName">
+		<input type="button" value="Add New" ng-click="addNew(newBugName)">
 	</section>
 	<section class="list">
 		<ol>
-			<li><span class="bugname">Bug - 1</span></li>
-			<li><span class="bugname closed">Bug - 2</span></li>
+			<li ng-repeat="bug in bugs">
+				<span class="bugname">{{bug}}</span>
+			</li>
 		</ol>
 	</section>
 	<input type="button" value="Remove Closed">
