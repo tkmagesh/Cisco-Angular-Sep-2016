@@ -63,22 +63,28 @@
 			padding: 5px;
 			border-radius: 5px;
 		}
+		.datetime{
+			font-style: italic;
+			display: block;
+		}
 	</style>
+	<script src="moment.js"></script>
 	<script src="angular.js"></script>
 	<script src="utils.js"></script>
 	<script>
 		var bugTrackerApp = angular.module("bugTrackerApp", ["utils"]);
 
 		bugTrackerApp.factory("bugOperations" , function(defaultBugName){
-			var currentBugId = 0;
+			
 			return {
 				createNew : function(bugName){
 					if (!bugName)
 						bugName = defaultBugName;
 					return {
-						id : ++currentBugId,
+						id : 0,
 						name : bugName,
-						isClosed : false
+						isClosed : false,
+						createdAt : new Date()
 					}
 				},
 				toggle : function(bug){
@@ -87,57 +93,81 @@
 			}
 		});
 
-		bugTrackerApp.value("defaultBugName", '[Default New Bug]')
+		bugTrackerApp.value("defaultBugName", '[Default New Bug]');
 
-		bugTrackerApp.controller("bugsController", function($scope, bugOperations, defaultBugName){
-			$scope.bugs = [
-				
-				
-			];
+		bugTrackerApp.factory("bugService", function($http, bugOperations){
+
+			function getAllBugs(){
+				return $http
+					.get('http://localhost:3000/bugs')
+					.then(function(response){
+						return response.data;
+					});
+			}
+			function addNewBug (bugName){
+				var newBug = bugOperations.createNew(bugName);
+				return $http
+					.post('http://localhost:3000/bugs', newBug)
+					.then(function(response){
+						return response.data;
+					})
+			}
+
+			function toggleBug(bug){
+				bugOperations.toggle(bug);
+				return $http
+					.put('http://localhost:3000/bugs/' + bug.id, bug)
+					.then(function(response){
+						return response.data;
+					});
+			}
+			function removeBug(bug){
+				return $http
+					.delete('http://localhost:3000/bugs/' + bug.id)
+					.then(function(response){
+						return response.data;
+					});	
+			}
+			return {
+				getAll : getAllBugs,
+				addNew : addNewBug,
+				toggle : toggleBug,
+				remove : removeBug
+			}
+
+		});
+
+		bugTrackerApp.controller("bugsController", function($scope, bugService){
+			$scope.bugs = [];
+
+			bugService
+				.getAll()
+				.then(function(data){
+					$scope.bugs = data;
+				});
+
 			$scope.addNew = function(bugName){
 				
-				var newBug = bugOperations.createNew(bugName);
-				$scope.bugs.push(newBug);
+				bugService
+					.addNew(bugName)
+					.then(function(data){
+						$scope.bugs.push(data);		
+					});
+				
 			};
 			$scope.toggle = function(bug){
-				bugOperations.toggle(bug);
+				bugService.toggle(bug);
 			};
 			
 			$scope.removeClosed = function(){
 				for(var i = $scope.bugs.length-1; i >=0; i--)
-					if ($scope.bugs[i].isClosed)
+					if ($scope.bugs[i].isClosed){
+						bugService.remove($scope.bugs[i]);
 						$scope.bugs.splice(i,1);
+					}
 			};
 		});
 
-		
-
-		/*
-		bugTrackerApp.filter('toClosedCount', function(){
-			return function(bugs){
-				var closedCount = 0;
-				for(var i=0; i < bugs.length; i++)
-					if (bugs[i].isClosed)
-						++closedCount;
-				return closedCount;
-			}
-		})
-		*/
-
-		/*bugTrackerApp.filter("toClosedCount", function($filter){
-			var builtInFilter = $filter('filter');
-			return function(bugs){
-				return builtInFilter(bugs, {isClosed : true}).length;
-			}
-		});*/
-
-		/*bugTrackerApp.filter('toClosedCount', function(){
-			return function(bugs){
-				return bugs.filter(function(bug){
-					return bug.isClosed;
-				}).length;
-			}
-		});*/
 
 		bugTrackerApp.filter('toClosedCount', function(){
 			return function(bugs){
@@ -183,8 +213,9 @@
 	<section class="list">
 		<ol>
 			<li ng-repeat="bug in (bugs | filter:searchBug | orderBy:sortBugBy:sortBugDescending)">
-				<span class="bugname" ng-click="toggle(bug)" ng-class="{closed : bug.isClosed}">	{{bug.name | trimText:20}} <i><sup>[{{bug.id}}]<sup></i>
+				<span class="bugname" ng-click="toggle(bug)" ng-class="{closed : bug.isClosed}">	{{bug.name | trimText:20}}
 				</span>
+				<span class="datetime">{{bug.createdAt | elapsed}}</span>
 			</li>
 		</ol>
 	</section>
