@@ -15,7 +15,7 @@
 		7. Sort the bugs - done
 		8. Improvise bug display - done
 		
-		9. Persist the bugs in localStorage
+		9. Persist the bugs in localStorage - done
 			window.localStorage
 			key/value store
 			value must be a string
@@ -30,7 +30,7 @@
 
 				length
 
-		10. Display 'createdAt'
+		10. Display 'createdAt' - done
 		
 		11. Persist the bugs in the server
 		12. Bug(s) are bookmarkable
@@ -63,7 +63,12 @@
 			padding: 5px;
 			border-radius: 5px;
 		}
+		.datetime{
+			font-style: italic;
+			display: block;
+		}
 	</style>
+	<script src="moment.js"></script>
 	<script src="angular.js"></script>
 	<script src="utils.js"></script>
 	<script>
@@ -78,7 +83,8 @@
 					return {
 						id : id,
 						name : bugName,
-						isClosed : false
+						isClosed : false,
+						createdAt : new Date()
 					}
 				},
 				toggle : function(bug){
@@ -89,8 +95,8 @@
 
 		bugTrackerApp.value("defaultBugName", '[Default New Bug]');
 
-		bugTrackerApp.factory("bugStorage", function(bugOperations){
-			var storage = window.localStorage;
+		bugTrackerApp.factory("bugStorage", function(bugOperations, $window){
+			var storage = $window.localStorage;
 			var currentBugId = 0;
 
 			function getAllBugs(){
@@ -153,34 +159,6 @@
 			};
 		});
 
-		
-
-		/*
-		bugTrackerApp.filter('toClosedCount', function(){
-			return function(bugs){
-				var closedCount = 0;
-				for(var i=0; i < bugs.length; i++)
-					if (bugs[i].isClosed)
-						++closedCount;
-				return closedCount;
-			}
-		})
-		*/
-
-		/*bugTrackerApp.filter("toClosedCount", function($filter){
-			var builtInFilter = $filter('filter');
-			return function(bugs){
-				return builtInFilter(bugs, {isClosed : true}).length;
-			}
-		});*/
-
-		/*bugTrackerApp.filter('toClosedCount', function(){
-			return function(bugs){
-				return bugs.filter(function(bug){
-					return bug.isClosed;
-				}).length;
-			}
-		});*/
 
 		bugTrackerApp.filter('toClosedCount', function(){
 			return function(bugs){
@@ -189,6 +167,8 @@
 				},0);
 			};
 		});
+
+		
 
 	</script>
 </head>
@@ -228,6 +208,8 @@
 			<li ng-repeat="bug in (bugs | filter:searchBug | orderBy:sortBugBy:sortBugDescending)">
 				<span class="bugname" ng-click="toggle(bug)" ng-class="{closed : bug.isClosed}">	{{bug.name | trimText:20}} <i><sup>[{{bug.id}}]<sup></i>
 				</span>
+				<!-- <span class="datetime">{{bug.createdAt | date:'dd-MMM-yyyy hh:mm:ss'}}</span> -->
+				<span class="datetime">{{bug.createdAt | elapsed}}</span>
 			</li>
 		</ol>
 	</section>
