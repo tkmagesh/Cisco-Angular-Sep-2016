@@ -32,7 +32,7 @@
 
 		10. Display 'createdAt'
 		
-		11. Persist the bugs in the server
+		11. Persist the bugs in the server 
 		12. Bug(s) are bookmarkable
 		13. Display Bug severity
 	-->
@@ -128,6 +128,10 @@
 
 			function toggleBug(bug){
 				bugOperations.toggle(bug);
+				return saveBug(bug);
+			}
+			function saveBug(bug){
+				
 				return $http
 					.put('http://localhost:3000/bugs/' + bug.id, bug)
 					.then(function(response){
@@ -153,6 +157,7 @@
 				getAll : getAllBugs,
 				getById : getBugById,
 				addNew : addNewBug,
+				save 	: saveBug,
 				toggle : toggleBug,
 				remove : removeBug
 			}
@@ -207,6 +212,10 @@
 				.then(function(bug){
 					$scope.bug = bug;
 				});
+
+			$scope.save = function(bug){
+				bugService.save(bug);
+			}
 		
 		});
 
@@ -236,6 +245,35 @@
 				.otherwise({
 					redirectTo : "/bugs"
 				});
+		});
+
+		bugTrackerApp.directive("bugSeverity", function(){
+			return {
+				restrict : 'E',
+				scope : { //isolated scope
+					data : '=', //two way binding
+					onchange : '&', //expression binding
+					min : '@', //one way binding
+					max : '@' //one way binding
+				},
+				templateUrl : 'bugSeverity.template.html',
+				controller : function($scope){
+					console.log($scope);
+					$scope.increment = function(data){
+						if (data.severity < parseInt($scope.max)){
+							data.severity++;
+							$scope.onchange(data);
+						}
+					}
+
+					$scope.decrement = function(data){
+						if (data.severity > parseInt($scope.min)){
+							data.severity--;
+							$scope.onchange(data);
+						}
+					}
+				}
+			}
 		})
 
 	</script>
