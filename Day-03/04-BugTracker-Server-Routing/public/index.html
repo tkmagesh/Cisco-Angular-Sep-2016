@@ -258,7 +258,6 @@
 				},
 				templateUrl : 'bugSeverity.template.html',
 				controller : function($scope){
-					console.log($scope);
 					$scope.increment = function(data){
 						if (data.severity < parseInt($scope.max)){
 							data.severity++;
