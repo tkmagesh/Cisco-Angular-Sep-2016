@@ -12,7 +12,7 @@ var pgm = (function(){
 		console.log('[Service Consumer] result = ', result);
 	}
 
-	function addAsync(x,y, onResultFn){
+	function addAsyncCallback(x,y, onResultFn){
 		console.log('       [Service Provider] adding ', x , ' and ', y);
 		setTimeout(function(){
 			var result = x + y;
@@ -22,16 +22,38 @@ var pgm = (function(){
 		},3000);
 	}
 
-	function addAsyncClient(x,y){
-		console.log('[Service Consumer] triggering addAsync');
-		addAsync(x,y, function(result){
+	function addAsyncCallbackClient(x,y){
+		console.log('[Service Consumer] triggering addAsyncCallback');
+		addAsyncCallback(x,y, function(result){
 			console.log('[Service Consumer] result = ', result);	
 		});
 		
 	}
 
+	var addAsyncEvents = (function(){
+		var _subscriptions = [];
+		function subscribe(subscriptionFn){
+			_subscriptions.push(subscriptionFn);
+		}
+		function add(x,y){
+			console.log('       [Service Provider] adding ', x , ' and ', y);
+			setTimeout(function(){
+				var result = x + y;
+				console.log('       [Service Provider] returning the result');
+				_subscriptions.forEach(function(subscriptionFn){
+					subscriptionFn(result);
+				})
+			},3000);
+		}
+		return {
+			subscribe : subscribe,
+			add : add
+		}
+	})();
+
 	return {
 		addSyncClient : addSyncClient,
-		addAsyncClient : addAsyncClient
+		addAsyncCallbackClient : addAsyncCallbackClient,
+		addAsyncEvents : addAsyncEvents
 	}
 })();
