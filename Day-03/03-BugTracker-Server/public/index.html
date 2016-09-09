@@ -99,11 +99,20 @@
 
 			function getAllBugs(){
 				return $http
-					.get('http://localhost:3000/bugs')
+					.get('http://localhost:3000/bugssss')
 					.then(function(response){
+						console.log(response);
 						return response.data;
+					})
+					.catch(function(response){
+						if (response.status === 404){
+							throw new Error("Data not found!!");
+						} else {
+							throw new Error("Unknown error");
+						}
 					});
 			}
+
 			function addNewBug (bugName){
 				var newBug = bugOperations.createNew(bugName);
 				return $http
@@ -111,6 +120,8 @@
 					.then(function(response){
 						return response.data;
 					})
+					
+					
 			}
 
 			function toggleBug(bug){
@@ -144,6 +155,9 @@
 				.getAll()
 				.then(function(data){
 					$scope.bugs = data;
+				}).catch(function(err){
+					console.dir(err);
+					$scope.message = err.message;
 				});
 
 			$scope.addNew = function(bugName){
@@ -182,6 +196,10 @@
 <body ng-app="bugTrackerApp" ng-controller="bugsController">
 	<h1>Bug Tracker</h1>
 	<hr>
+	<section class="message">
+		<span>{{message}}</span>
+		<input type="button" value="Clear"  ng-click="message=''" ng-hide="message === ''">
+	</section>
 	<section class="stats">
 		<span class="closed">{{bugs | toClosedCount}}</span>
 		<!-- <span class="closed">{{ (bugs | filter:{isClosed : true}).length }}</span> -->
