@@ -45,15 +45,29 @@ var pgm = (function(){
 				})
 			},3000);
 		}
+
 		return {
 			subscribe : subscribe,
 			add : add
 		}
 	})();
 
+	function addAsyncPromise(x,y){
+		console.log('       [Service Provider] adding ', x , ' and ', y);
+		var promise = new Promise(function(/*success*/ resolveFn, /*failure*/ rejectFn){
+			setTimeout(function(){
+				var result = x + y;
+				console.log('       [Service Provider] returning the result');
+				resolveFn(result);
+			},3000);
+		});
+		return promise;
+	}
+
 	return {
 		addSyncClient : addSyncClient,
 		addAsyncCallbackClient : addAsyncCallbackClient,
-		addAsyncEvents : addAsyncEvents
+		addAsyncEvents : addAsyncEvents,
+		addAsyncPromise : addAsyncPromise
 	}
 })();
